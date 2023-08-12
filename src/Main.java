@@ -49,27 +49,37 @@ class ShoppingCart {
     }
 
   
-    void displayProducts() {
-        for (Product product : products) {
-            System.out.println(product.name + " - " + product.price + " per " + product.unit);
-            List<Discount> applicableDiscounts = getEligibleDiscounts(product.productId);
-            if (!applicableDiscounts.isEmpty()) {
-                System.out.println("Applicable Discounts:");
-                for (Discount discount : applicableDiscounts) {
-                    System.out.println("Discount ID: " + discount.discountId);
-                    System.out.println("Discount Name: " + discount.name);
-                    System.out.println("Effective Start Date: " + discount.effectiveStartDate);
-                    System.out.println("Effective End Date: " + (discount.effectiveEndDate != null ? discount.effectiveEndDate : "N/A"));
-                }
-            } else {
-                System.out.println("No Discounts Applicable for this Product.");
-            }
+      void displayProducts() {
+         if (products.isEmpty()) {
+            System.out.println("Your cart is empty.");
+            return;
         }
-    }
+        System.out.println("-------------------------------------------------------");
+        System.out.printf("%-10s | %-20s | %-10s | %-10s | %-10s%n",
+                          "Product ID", "Product Name", "Unit", "Price", "Discounts");
+        System.out.println("-------------------------------------------------------");
 
+        for (Product product : products) {
+            List<Discount> applicableDiscounts = getEligibleDiscounts(product.productId);
+            String discountInfo = "";
+            if (!applicableDiscounts.isEmpty()) {
+                StringBuilder discountsBuilder = new StringBuilder();
+                for (Discount discount : applicableDiscounts) {
+                    discountsBuilder.append("ID: ").append(discount.discountId).append(", ");
+                }
+                discountInfo = discountsBuilder.toString();
+            } else {
+                discountInfo = "None";
+            }
+
+            System.out.printf("%-10d | %-20s | %-10s | %-10.2f | %-10s%n",
+                              product.productId, product.name, product.unit, product.price, discountInfo);
+        }
+
+        System.out.println("-------------------------------------------------------");
+    }
     double calculateTotalPrice() {
         double totalPrice = 0;
-        // Calculate total price after applying discounts
         for (Product product : products) {
             double productPrice = product.price;
             for (Discount discount : getEligibleDiscounts(product.productId)) {
@@ -91,7 +101,6 @@ class ShoppingCart {
 
     private List<Discount> getEligibleDiscounts(int productId) {
         List<Discount> eligibleDiscounts = new ArrayList<>();
-        // Implement logic to filter eligible discounts for the given product based on effective dates
         for (Discount discount : getDiscounts()) {
             if (discount.productIds.contains(productId)) {
                 eligibleDiscounts.add(discount);
@@ -101,20 +110,14 @@ class ShoppingCart {
     }
 
     private boolean isDiscountValid(String effectiveEndDate) {
-        // Implement logic to check if the discount is still valid based on the effective end date
-        // For simplicity, let's assume all discounts are still valid
-        // In a real-world scenario, you would need to compare the current date with the effective end date
         return true;
     }
 
     private int getProductQuantity(int productId) {
-        // Implement logic to get the quantity of the given product in the shopping cart
         return productQuantities.getOrDefault(productId, 0);
     }
 
     private List<Discount> getDiscounts() {
-        // Implement logic to fetch all available discounts from the database or any data source
-        // For simplicity, let's assume we have hardcoded the discounts here
         List<Discount> discounts = new ArrayList<>();
         List<Integer> productIds1 = new ArrayList<>();
         productIds1.add(1);
@@ -163,8 +166,6 @@ public class Main {
                 case 3:
                     System.out.println("Enter the product ID: ");
                     int productId = scanner.nextInt();
-                    // You can implement product lookup based on the entered product ID
-                    // For simplicity, let's assume the product exists and add it to the cart
                     if (productId == 1) {
                         cart.addProduct(product1);
                     } else if (productId == 2) {
