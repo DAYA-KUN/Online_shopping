@@ -1,3 +1,5 @@
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -32,6 +34,14 @@ class Discount {
         this.effectiveStartDate = effectiveStartDate;
         this.effectiveEndDate = effectiveEndDate;
     }
+
+        boolean isDiscountValid() {
+        LocalDate startDate = LocalDate.parse(effectiveStartDate, DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+        LocalDate endDate = effectiveEndDate == null ? null : LocalDate.parse(effectiveEndDate, DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+        LocalDate today = LocalDate.now();
+
+        return today.isEqual(startDate) || (today.isAfter(startDate) && (endDate == null || today.isBefore(endDate)));
+    }
 }
 
 class ShoppingCart {
@@ -60,10 +70,10 @@ class ShoppingCart {
             System.out.println("Your cart is empty.");
             return;
         }
-        System.out.println("-------------------------------------------------------");
+        System.out.println("------------------------------------------------------------------------");
         System.out.printf("%-10s | %-20s | %-10s | %-10s | %-10s%n",
                           "Product ID", "Product Name", "Unit", "Price", "Discounts");
-        System.out.println("-------------------------------------------------------");
+        System.out.println("------------------------------------------------------------------------");
 
         for (Product product : products) {
             List<Discount> applicableDiscounts = getEligibleDiscounts(product.productId);
@@ -82,13 +92,13 @@ class ShoppingCart {
                               product.productId, product.name, product.unit, product.price, discountInfo);
         }
 
-        System.out.println("-------------------------------------------------------");
+        System.out.println("------------------------------------------------------------------------");
     }
      void displayCartContents() {
-        System.out.println("-------------------------------------------------------");
-        System.out.printf("%-10s | %-20s | %-10s | %-10s | %-10s | %-10s%n",
+        System.out.println("---------------------------------------------------------------------------------------------");
+        System.out.printf("%-10s | %-20s | %-10s | %-10s | %-20s | %-10s%n",
                           "Product ID", "Product Name", "Unit", "Price", "Discounts", "Quantity");
-        System.out.println("-------------------------------------------------------");
+        System.out.println("---------------------------------------------------------------------------------------------");
 
         for (Product product : products) {
             List<Discount> applicableDiscounts = getEligibleDiscounts(product.productId);
@@ -97,6 +107,7 @@ class ShoppingCart {
                 StringBuilder discountsBuilder = new StringBuilder();
                 for (Discount discount : applicableDiscounts) {
                     discountsBuilder.append("ID: ").append(discount.discountId).append(", ");
+                    discountsBuilder.append("Valid: ").append(discount.isDiscountValid() ? "Yes" : "No").append(", ");
                 }
                 discountInfo = discountsBuilder.toString();
             } else {
@@ -105,11 +116,11 @@ class ShoppingCart {
 
             int productQuantity = getProductQuantity(product.productId);
 
-            System.out.printf("%-10d | %-20s | %-10s | %-10.2f | %-10s | %-10d%n",
-                              product.productId, product.name, product.unit, product.price, discountInfo, productQuantity);
+            System.out.printf("%-10d | %-20s | %-10s | %-10.2f | %-20s | %-10d%n",
+                                      product.productId, product.name, product.unit, product.price, discountInfo, productQuantity);
         }
 
-        System.out.println("-------------------------------------------------------");
+        System.out.println("----------------------------------------------------------------------------------------------");
         double totalPrice = calculateTotalPrice();
         System.out.println("Total Price: " + totalPrice);
     }
@@ -118,14 +129,17 @@ class ShoppingCart {
         for (Product product : products) {
             double productPrice = product.price;
             for (Discount discount : getEligibleDiscounts(product.productId)) {
-                if (discount.effectiveEndDate == null || isDiscountValid(discount.effectiveEndDate)) {
-                    if (discount.productIds.contains(product.productId)) {
-                        int quantity = getProductQuantity(product.productId);
-                        int discountProductCount = discount.productIds.size();
-                        int eligibleQuantity = quantity / discountProductCount;
-                        int remainingQuantity = quantity % discountProductCount;
-                        double discountedPrice = (eligibleQuantity * (discountProductCount - 1) + remainingQuantity) * product.price;
-                        productPrice = Math.min(productPrice, discountedPrice);
+                if (discount.isDiscountValid()) {
+                    if (discount.effectiveEndDate == null || isDiscountValid(discount.effectiveEndDate)) {
+                        if (discount.productIds.contains(product.productId)) {
+                            int quantity = getProductQuantity(product.productId);
+                            int discountProductCount = discount.productIds.size();
+                            int eligibleQuantity = quantity / discountProductCount;
+                            int remainingQuantity = quantity % discountProductCount;
+                            double discountedPrice = (eligibleQuantity * (discountProductCount - 1) + remainingQuantity)
+                                    * product.price;
+                            productPrice = Math.min(productPrice, discountedPrice);
+                        }
                     }
                 }
             }
@@ -170,7 +184,7 @@ class ShoppingCart {
 }
 
 public class main {
-    public static void main(String[] args) {
+    public static void main (String[] args) {
         Product product1 = new Product(1, "Banana", "kg", 100.00);
         Product product2 = new Product(2, "Orange", "kg", 230.00);
         Product product3 = new Product(3, "Apple", "kg", 330.00);
@@ -215,6 +229,10 @@ public class main {
                 int productId = scanner.nextInt();
                 System.out.print("Enter the product quantity: ");
                 int quantity = scanner.nextInt();
+                if (quantity <= 0) {
+                    System.out.println("Invalid quantity.");
+                    break;
+                }
 
                 Product selectedProduct = null;
                 if (productId == 1) {
