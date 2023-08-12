@@ -149,16 +149,18 @@ class ShoppingCart {
 
 public class demo {
     public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+        ShoppingCart cart = new ShoppingCart();
         Product product1 = new Product(1, "Banana", "kg", 100.00);
         Product product2 = new Product(2, "Orange", "kg", 230.00);
         Product product3 = new Product(3, "Apple", "kg", 330.00);
 
-        ShoppingCart cart = new ShoppingCart();
+        
         cart.addProduct(product1);
         cart.addProduct(product2);
         cart.addProduct(product3);
 
-        Scanner scanner = new Scanner(System.in);
+        
         
         int option;
         do {
