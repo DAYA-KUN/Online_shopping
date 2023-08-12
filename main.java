@@ -38,23 +38,6 @@ class ShoppingCart {
     List<Product> products;
     Map<Integer, Integer> productQuantities;
 
-        void displayCartContents() {
-        System.out.println("-------------------------------------------------------");
-        System.out.printf("%-10s | %-20s | %-10s | %-10s | %-10s | %-10s%n",
-                          "Product ID", "Product Name", "Unit", "Price", "Quantity", "Subtotal");
-        System.out.println("-------------------------------------------------------");
-
-        for (Product product : products) {
-            int quantity = getProductQuantity(product.productId);
-            double subtotal = product.price * quantity;
-
-            System.out.printf("%-10d | %-20s | %-10s | %-10.2f | %-10d | %-10.2f%n",
-                              product.productId, product.name, product.unit, product.price, quantity, subtotal);
-        }
-
-        System.out.println("-------------------------------------------------------");
-    }
-
     ShoppingCart() {
         products = new ArrayList<>();
         productQuantities = new HashMap<>();
@@ -65,7 +48,12 @@ class ShoppingCart {
         productQuantities.put(product.productId, productQuantities.getOrDefault(product.productId, 0) + 1);
     }
 
-    void displayProducts() {
+  
+      void displayProducts() {
+         if (products.isEmpty()) {
+            System.out.println("Your cart is empty.");
+            return;
+        }
         System.out.println("-------------------------------------------------------");
         System.out.printf("%-10s | %-20s | %-10s | %-10s | %-10s%n",
                           "Product ID", "Product Name", "Unit", "Price", "Discounts");
@@ -90,8 +78,7 @@ class ShoppingCart {
 
         System.out.println("-------------------------------------------------------");
     }
-
-     double calculateTotalPrice() {
+    double calculateTotalPrice() {
         double totalPrice = 0;
         for (Product product : products) {
             double productPrice = product.price;
@@ -122,7 +109,7 @@ class ShoppingCart {
         return eligibleDiscounts;
     }
 
-    private boolean isDiscountValid(String effectiveEndDate){
+    private boolean isDiscountValid(String effectiveEndDate) {
         return true;
     }
 
@@ -147,21 +134,18 @@ class ShoppingCart {
     }
 }
 
-public class demo {
+public class main {
     public static void main(String[] args) {
-        Scanner scanner = new Scanner(System.in);
-        ShoppingCart cart = new ShoppingCart();
         Product product1 = new Product(1, "Banana", "kg", 100.00);
         Product product2 = new Product(2, "Orange", "kg", 230.00);
         Product product3 = new Product(3, "Apple", "kg", 330.00);
 
-        
+        ShoppingCart cart = new ShoppingCart();
         cart.addProduct(product1);
         cart.addProduct(product2);
         cart.addProduct(product3);
 
-        
-        
+        Scanner scanner = new Scanner(System.in);
         int option;
         do {
             System.out.println("1. Show Products");
@@ -173,25 +157,14 @@ public class demo {
 
             switch (option) {
                 case 1:
-                    System.out.println("-------------------------------------------------------");
-                    System.out.printf("%-10s | %-20s | %-10s | %-10s%n",
-                                      "Product ID", "Product Name", "Unit", "Price");
-                    System.out.println("-------------------------------------------------------");
-                    System.out.printf("%-10d | %-20s | %-10s | %-10.2f%n",
-                                      product1.productId, product1.name, product1.unit, product1.price);
-                    System.out.printf("%-10d | %-20s | %-10s | %-10.2f%n",
-                                      product2.productId, product2.name, product2.unit, product2.price);
-                    System.out.printf("%-10d | %-20s | %-10s | %-10.2f%n",
-                                      product3.productId, product3.name, product3.unit, product3.price);
-                    System.out.println("-------------------------------------------------------");
+                    cart.displayProducts();
                     break;
                 case 2:
-                    cart.displayCartContents();
                     double totalPrice = cart.calculateTotalPrice();
                     System.out.println("Shopping Cart Total Price: " + totalPrice);
                     break;
                 case 3:
-                     System.out.println("Enter the product ID: ");
+                    System.out.println("Enter the product ID: ");
                     int productId = scanner.nextInt();
                     if (productId == 1) {
                         cart.addProduct(product1);
