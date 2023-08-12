@@ -37,10 +37,16 @@ class Discount {
 class ShoppingCart {
     List<Product> products;
     Map<Integer, Integer> productQuantities;
+    List<Discount> discounts;
 
     ShoppingCart() {
         products = new ArrayList<>();
         productQuantities = new HashMap<>();
+        discounts = new ArrayList<>();
+    }
+
+     void addDiscount(Discount discount) {
+        discounts.add(discount);
     }
 
     void addProduct(Product product) {
@@ -77,6 +83,35 @@ class ShoppingCart {
         }
 
         System.out.println("-------------------------------------------------------");
+    }
+     void displayCartContents() {
+        System.out.println("-------------------------------------------------------");
+        System.out.printf("%-10s | %-20s | %-10s | %-10s | %-10s | %-10s%n",
+                          "Product ID", "Product Name", "Unit", "Price", "Discounts", "Quantity");
+        System.out.println("-------------------------------------------------------");
+
+        for (Product product : products) {
+            List<Discount> applicableDiscounts = getEligibleDiscounts(product.productId);
+            String discountInfo = "";
+            if (!applicableDiscounts.isEmpty()) {
+                StringBuilder discountsBuilder = new StringBuilder();
+                for (Discount discount : applicableDiscounts) {
+                    discountsBuilder.append("ID: ").append(discount.discountId).append(", ");
+                }
+                discountInfo = discountsBuilder.toString();
+            } else {
+                discountInfo = "None";
+            }
+
+            int productQuantity = getProductQuantity(product.productId);
+
+            System.out.printf("%-10d | %-20s | %-10s | %-10.2f | %-10s | %-10d%n",
+                              product.productId, product.name, product.unit, product.price, discountInfo, productQuantity);
+        }
+
+        System.out.println("-------------------------------------------------------");
+        double totalPrice = calculateTotalPrice();
+        System.out.println("Total Price: " + totalPrice);
     }
     double calculateTotalPrice() {
         double totalPrice = 0;
@@ -139,11 +174,24 @@ public class main {
         Product product1 = new Product(1, "Banana", "kg", 100.00);
         Product product2 = new Product(2, "Orange", "kg", 230.00);
         Product product3 = new Product(3, "Apple", "kg", 330.00);
+        Product product4 = new Product(4, "Grapes", "Kg", 230.00);
 
         ShoppingCart cart = new ShoppingCart();
         cart.addProduct(product1);
         cart.addProduct(product2);
         cart.addProduct(product3);
+        cart.addProduct(product4);
+        List<Integer> productIds1 = new ArrayList<>();
+        productIds1.add(1);
+        Discount discount1 = new Discount(1, productIds1, "Buy 1 Get 1 Free", "2023-08-02", "2023-08-10");
+
+        List<Integer> productIds2 = new ArrayList<>();
+        productIds2.add(2);
+        productIds2.add(3);
+        Discount discount2 = new Discount(2, productIds2, "Buy 2 Get 1 Free", "2023-08-02", null);
+
+        cart.addDiscount(discount1);
+        cart.addDiscount(discount2);
 
         Scanner scanner = new Scanner(System.in);
         int option;
@@ -159,22 +207,32 @@ public class main {
                 case 1:
                     cart.displayProducts();
                     break;
-                case 2:
-                    double totalPrice = cart.calculateTotalPrice();
-                    System.out.println("Shopping Cart Total Price: " + totalPrice);
+                    case 2:
+                    cart.displayCartContents();
                     break;
                 case 3:
-                    System.out.println("Enter the product ID: ");
-                    int productId = scanner.nextInt();
-                    if (productId == 1) {
-                        cart.addProduct(product1);
-                    } else if (productId == 2) {
-                        cart.addProduct(product2);
-                    } else if (productId == 3) {
-                        cart.addProduct(product3);
-                    } else {
-                        System.out.println("Invalid product ID.");
-                    }
+                System.out.print("Enter the product ID: ");
+                int productId = scanner.nextInt();
+                System.out.print("Enter the product quantity: ");
+                int quantity = scanner.nextInt();
+
+                Product selectedProduct = null;
+                if (productId == 1) {
+                    selectedProduct = product1;
+                } else if (productId == 2) {
+                    selectedProduct = product2;
+                } else if (productId == 3) {
+                    selectedProduct = product3;
+                } else if (productId == 4) {
+                    selectedProduct = product4;
+                } else {
+                    System.out.println("Invalid product ID.");
+                    break;
+                }
+
+                for (int i = 0; i < quantity; i++) {
+                    cart.addProduct(selectedProduct);
+                }
                     break;
                 case 4:
                     System.out.println("Exiting program.");
