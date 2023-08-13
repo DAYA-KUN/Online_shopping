@@ -59,11 +59,15 @@ class ShoppingCart {
         discounts.add(discount);
     }
 
-    void addProduct(Product product) {
-        products.add(product);
-        productQuantities.put(product.productId, productQuantities.getOrDefault(product.productId, 0) + 1);
+    void addProduct(Product product, int quantity) {
+    if (quantity <= 0) {
+        System.out.println("Invalid quantity.");
+        return;
     }
 
+    products.add(product);
+    productQuantities.put(product.productId, productQuantities.getOrDefault(product.productId, 0) + quantity);
+}
   
       void displayProducts() {
          if (products.isEmpty()) {
@@ -95,6 +99,11 @@ class ShoppingCart {
         System.out.println("------------------------------------------------------------------------");
     }
      void displayCartContents() {
+
+        if (products.isEmpty()) {
+        System.out.println("Your cart is empty.");
+        return;
+    }
         System.out.println("---------------------------------------------------------------------------------------------");
         System.out.printf("%-10s | %-20s | %-10s | %-10s | %-20s | %-10s%n",
                           "Product ID", "Product Name", "Unit", "Price", "Discounts", "Quantity");
@@ -191,10 +200,10 @@ public class main {
         Product product4 = new Product(4, "Grapes", "Kg", 230.00);
 
         ShoppingCart cart = new ShoppingCart();
-        cart.addProduct(product1);
-        cart.addProduct(product2);
-        cart.addProduct(product3);
-        cart.addProduct(product4);
+        cart.addProduct(product1, 0);
+        cart.addProduct(product2, 0);
+        cart.addProduct(product3, 0);
+        cart.addProduct(product4, 0);
         List<Integer> productIds1 = new ArrayList<>();
         productIds1.add(1);
         Discount discount1 = new Discount(1, productIds1, "Buy 1 Get 1 Free", "2023-08-02", "2023-08-10");
@@ -224,33 +233,27 @@ public class main {
                     case 2:
                     cart.displayCartContents();
                     break;
-                case 3:
-                System.out.print("Enter the product ID: ");
-                int productId = scanner.nextInt();
-                System.out.print("Enter the product quantity: ");
-                int quantity = scanner.nextInt();
-                if (quantity <= 0) {
-                    System.out.println("Invalid quantity.");
-                    break;
-                }
-
-                Product selectedProduct = null;
-                if (productId == 1) {
-                    selectedProduct = product1;
-                } else if (productId == 2) {
-                    selectedProduct = product2;
-                } else if (productId == 3) {
-                    selectedProduct = product3;
-                } else if (productId == 4) {
-                    selectedProduct = product4;
-                } else {
-                    System.out.println("Invalid product ID.");
-                    break;
-                }
-
-                for (int i = 0; i < quantity; i++) {
-                    cart.addProduct(selectedProduct);
-                }
+                    case 3:
+                    System.out.print("Enter the product ID: ");
+                    int productId = scanner.nextInt();
+                    System.out.print("Enter the product quantity: ");
+                    int quantity = scanner.nextInt();
+                    Product selectedProduct = null;
+                
+                    if (productId == 1) {
+                        selectedProduct = product1;
+                    } else if (productId == 2) {
+                        selectedProduct = product2;
+                    } else if (productId == 3) {
+                        selectedProduct = product3;
+                    } else if (productId == 4) {
+                        selectedProduct = product4;
+                    } else {
+                        System.out.println("Invalid product ID.");
+                        break;
+                    }
+                
+                    cart.addProduct(selectedProduct, quantity);
                     break;
                 case 4:
                     System.out.println("Exiting program.");
